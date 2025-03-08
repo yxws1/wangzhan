@@ -39,14 +39,16 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         .site img {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 8px;
-        }
+        width: 100px;
+        height: 70px;
+        margin-bottom: 8px;
+        border-radius: 20px; /* 添加圆角 */
+        object-fit: contain; /* 确保图片比例正确 */
+       }
         .site a {
             text-decoration: none;
             color: #333;
-            font-size: 14px;
+            font-size: 20px;
         }
         @media (max-width: 1200px) {
             .container {
