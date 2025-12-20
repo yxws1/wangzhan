@@ -20,7 +20,6 @@
             overflow: hidden;
         }
         
-        /* 左侧区域 - 占1/3 */
         .left-panel {
             width: 33.33%;
             display: flex;
@@ -29,7 +28,6 @@
             height: 100%;
         }
         
-        /* 词条列表区域 - 占6/7 */
         .item-list {
             flex: 6;
             background-color: white;
@@ -92,12 +90,10 @@
             font-style: italic;
         }
         
-        /* 左侧空白区域 */
         .left-spacer {
             flex: 1;
         }
         
-        /* 右侧区域 - 占2/3 */
         .right-panel {
             width: 66.67%;
             display: flex;
@@ -106,7 +102,6 @@
             height: 100%;
         }
         
-        /* 输入区域 - 占3/4 */
         .input-area {
             flex: 3;
             display: flex;
@@ -135,7 +130,6 @@
             border-color: #1890ff;
         }
         
-        /* 按钮区域 */
         .button-area {
             margin-top: 15px;
             display: flex;
@@ -152,12 +146,17 @@
             font-weight: bold;
         }
         
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .btn-clear {
             background-color: #ff4d4f;
             color: white;
         }
         
-        .btn-clear:hover {
+        .btn-clear:hover:not(:disabled) {
             background-color: #ff7875;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
@@ -168,17 +167,16 @@
             color: white;
         }
         
-        .btn-save:hover {
+        .btn-save:hover:not(:disabled) {
             background-color: #73d13d;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
         }
         
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(0);
         }
         
-        /* 状态区域 - 占1/4 */
         .status-area {
             flex: 1;
             background-color: white;
@@ -210,23 +208,34 @@
             border: 2px solid #91d5ff;
         }
         
+        .status-warning {
+            background-color: #fff7e6;
+            color: #fa8c16;
+            border: 2px solid #ffd591;
+        }
+        
         .status-empty {
             color: #999;
+        }
+
+        .loading {
+            color: #1890ff;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
-    <!-- 左侧面板 -->
     <div class="left-panel">
-        <div class="item-list" id="itemList">
-            <!-- 词条将通过JavaScript生成 -->
-        </div>
+        <div class="item-list" id="itemList"></div>
         <div class="left-spacer"></div>
     </div>
     
-    <!-- 右侧面板 -->
     <div class="right-panel">
-        <!-- 输入区域 -->
         <div class="input-area">
             <textarea 
                 id="textInput" 
@@ -234,63 +243,147 @@
                 maxlength="10000"
             ></textarea>
             <div class="button-area">
-                <button class="btn-clear" onclick="clearText()">清除</button>
-                <button class="btn-save" onclick="saveText()">保存</button>
+                <button class="btn-clear" id="btnClear" onclick="clearText()">清除</button>
+                <button class="btn-save" id="btnSave" onclick="saveText()">保存</button>
             </div>
         </div>
         
-        <!-- 状态区域 -->
         <div class="status-area">
-            <div class="status-text status-empty" id="statusText">等待操作...</div>
+            <div class="status-text status-empty" id="statusText">正在加载...</div>
         </div>
     </div>
 
     <script>
-        // 初始化数据
+        // ========== 配置区域 - 请修改这里 ==========
+        const CONFIG = {
+            // 你的GitHub用户名
+            owner: 'yxws1',
+            // 仓库名称
+            repo: 'wangzhan',
+            // data.json文件的路径（如果在根目录就是 'data.json'）
+            filePath: 'data.json',
+            // 你的GitHub Personal Access Token（需要有repo权限）
+            token: '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'
+        };
+        // ========================================
+
         let items = [];
         let selectedIndex = 0;
-        let maxItems = 0;
+        let maxItems = 12; // 默认12个，后续可自动计算
+        let fileSha = ''; // 用于更新文件
 
         // 计算可以容纳的最大词条数量
         function calculateMaxItems() {
             const itemList = document.getElementById('itemList');
             const listHeight = itemList.clientHeight;
-            const padding = 40; // 上下padding总和
+            const padding = 40;
             const availableHeight = listHeight - padding;
-            
-            // 估算每个词条的高度（包括margin）
-            const itemHeight = 52; // padding(20) + border(4) + 内容高度(28)
-            const itemMargin = 8; // 词条之间的间距
-            
-            // 计算最多可以放多少个词条（不产生滚动条）
+            const itemHeight = 52;
+            const itemMargin = 8;
             const count = Math.floor((availableHeight + itemMargin) / (itemHeight + itemMargin));
-            
             return Math.max(1, count);
         }
 
-        // 页面加载时初始化
-        window.onload = function() {
-            // 计算最大词条数
-            maxItems = calculateMaxItems();
-            
-            // 从localStorage加载数据
-            const savedItems = localStorage.getItem('aiItems');
-            if (savedItems) {
-                const loadedItems = JSON.parse(savedItems);
-                // 如果保存的数据少于最大数量，补齐；如果多了，截取
-                items = loadedItems.slice(0, maxItems);
+        // 从GitHub加载数据
+        async function loadFromGitHub() {
+            try {
+                showStatus('正在加载数据...', 'info');
+                setButtonsEnabled(false);
+
+                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.filePath}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('无法加载数据文件');
+                }
+
+                const data = await response.json();
+                fileSha = data.sha; // 保存SHA用于后续更新
+
+                // 解码base64内容
+                const content = decodeURIComponent(escape(atob(data.content)));
+                const jsonData = JSON.parse(content);
+
+                items = jsonData.items || [];
+                
+                // 确保items数组长度符合maxItems
                 while (items.length < maxItems) {
                     items.push('');
                 }
-            } else {
-                // 初始化空数组
+                if (items.length > maxItems) {
+                    items = items.slice(0, maxItems);
+                }
+
+                renderItems();
+                loadItemContent(0);
+                showStatus('加载成功！', 'success');
+                setButtonsEnabled(true);
+
+            } catch (error) {
+                console.error('加载失败:', error);
+                showStatus('加载失败: ' + error.message, 'warning');
+                // 失败时使用空数据
                 items = Array(maxItems).fill('');
+                renderItems();
+                loadItemContent(0);
+                setButtonsEnabled(true);
             }
-            
+        }
+
+        // 保存到GitHub
+        async function saveToGitHub() {
+            try {
+                showStatus('正在保存到GitHub...', 'info');
+                setButtonsEnabled(false);
+
+                const content = JSON.stringify({ items: items }, null, 2);
+                const encodedContent = btoa(unescape(encodeURIComponent(content)));
+
+                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.filePath}`;
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update data - ${new Date().toLocaleString('zh-CN')}`,
+                        content: encodedContent,
+                        sha: fileSha
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '保存失败');
+                }
+
+                const data = await response.json();
+                fileSha = data.content.sha; // 更新SHA
+
+                showStatus('保存成功！', 'success');
+                setButtonsEnabled(true);
+                return true;
+
+            } catch (error) {
+                console.error('保存失败:', error);
+                showStatus('保存失败: ' + error.message, 'warning');
+                setButtonsEnabled(true);
+                return false;
+            }
+        }
+
+        // 页面加载时初始化
+        window.onload = async function() {
+            maxItems = calculateMaxItems();
             console.log(`可容纳词条数量: ${maxItems}`);
-            
-            renderItems();
-            loadItemContent(0);
+            await loadFromGitHub();
         };
 
         // 窗口大小改变时重新计算
@@ -299,7 +392,6 @@
             if (newMaxItems !== maxItems) {
                 maxItems = newMaxItems;
                 
-                // 调整items数组大小
                 if (items.length < maxItems) {
                     while (items.length < maxItems) {
                         items.push('');
@@ -313,7 +405,6 @@
                 
                 renderItems();
                 loadItemContent(selectedIndex);
-                console.log(`调整后可容纳词条数量: ${maxItems}`);
             }
         };
 
@@ -354,7 +445,7 @@
         }
 
         // 保存文本
-        function saveText() {
+        async function saveText() {
             const text = document.getElementById('textInput').value.trim();
             
             if (text.length === 0) {
@@ -368,13 +459,14 @@
             }
             
             items[selectedIndex] = text;
-            localStorage.setItem('aiItems', JSON.stringify(items));
             renderItems();
-            showStatus('保存成功！', 'success');
+            
+            // 保存到GitHub
+            await saveToGitHub();
         }
 
         // 清除文本
-        function clearText() {
+        async function clearText() {
             if (items[selectedIndex] === '') {
                 showStatus('当前词条已经是空的', 'info');
                 return;
@@ -382,9 +474,13 @@
             
             items[selectedIndex] = '';
             document.getElementById('textInput').value = '';
-            localStorage.setItem('aiItems', JSON.stringify(items));
             renderItems();
-            showStatus('清除成功！', 'success');
+            
+            // 保存到GitHub
+            const saved = await saveToGitHub();
+            if (saved) {
+                showStatus('清除成功！', 'success');
+            }
         }
 
         // 显示状态
@@ -393,11 +489,18 @@
             statusText.textContent = message;
             statusText.className = 'status-text status-' + type;
             
-            // 3秒后恢复默认状态
-            setTimeout(() => {
-                statusText.textContent = '等待操作...';
-                statusText.className = 'status-text status-empty';
-            }, 3000);
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusText.textContent = '等待操作...';
+                    statusText.className = 'status-text status-empty';
+                }, 3000);
+            }
+        }
+
+        // 启用/禁用按钮
+        function setButtonsEnabled(enabled) {
+            document.getElementById('btnSave').disabled = !enabled;
+            document.getElementById('btnClear').disabled = !enabled;
         }
     </script>
 </body>
