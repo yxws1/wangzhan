@@ -3,414 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>收藏2网站</title>
+    <title>AI交互任务管理</title>
     <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #f5f5f5;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            height: 100vh;
+            display: flex;
             padding: 20px;
+            background-color: #f5f5f5;
+            overflow: hidden;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .container {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 15px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .site {
+        
+        /* 左侧区域 - 占1/3 */
+        .left-panel {
+            width: 33.33%;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 10px;
+            padding-right: 15px;
+            height: 100%;
+        }
+        
+        /* 词条列表区域 - 占6/7 */
+        .item-list {
+            flex: 6;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 20px 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .site:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        
+        .item {
+            display: flex;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #fafafa;
+            flex-shrink: 0;
         }
-        .site img {
-        width: 100px;
-        height: 70px;
-        margin-bottom: 8px;
-        border-radius: 20px; /* 添加圆角 */
-        object-fit: contain; /* 确保图片比例正确 */
-       }
-        .site a {
-            text-decoration: none;
-            color: #333;
-            font-size: 20px;
+        
+        .item:hover {
+            border-color: #1890ff;
+            background-color: #f0f8ff;
         }
-        @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: repeat(6, 1fr);
-            }
+        
+        .item.selected {
+            border-color: #1890ff;
+            background-color: #e6f7ff;
+            box-shadow: 0 0 8px rgba(24, 144, 255, 0.3);
         }
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: repeat(4, 1fr);
-            }
+        
+        .item-number {
+            width: 10%;
+            min-width: 30px;
+            font-weight: bold;
+            color: #1890ff;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        @media (max-width: 480px) {
-            .container {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        
+        .item-content {
+            flex: 1;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .item-content.empty {
+            color: #ccc;
+            font-style: italic;
+        }
+        
+        /* 左侧空白区域 */
+        .left-spacer {
+            flex: 1;
+        }
+        
+        /* 右侧区域 - 占2/3 */
+        .right-panel {
+            width: 66.67%;
+            display: flex;
+            flex-direction: column;
+            padding-left: 15px;
+            height: 100%;
+        }
+        
+        /* 输入区域 - 占3/4 */
+        .input-area {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        textarea {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            border-color: #1890ff;
+        }
+        
+        /* 按钮区域 */
+        .button-area {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn-clear {
+            background-color: #ff4d4f;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background-color: #ff7875;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+        }
+        
+        .btn-save {
+            background-color: #52c41a;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background-color: #73d13d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        /* 状态区域 - 占1/4 */
+        .status-area {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .status-text {
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .status-success {
+            background-color: #f6ffed;
+            color: #52c41a;
+            border: 2px solid #b7eb8f;
+        }
+        
+        .status-info {
+            background-color: #e6f7ff;
+            color: #1890ff;
+            border: 2px solid #91d5ff;
+        }
+        
+        .status-empty {
+            color: #999;
         }
     </style>
 </head>
 <body>
-    <h1>工作台</h1>
+    <!-- 左侧面板 -->
+    <div class="left-panel">
+        <div class="item-list" id="itemList">
+            <!-- 词条将通过JavaScript生成 -->
+        </div>
+        <div class="left-spacer"></div>
+    </div>
     
-    <div class="container">
-        <!-- 网站示例 - 你可以按照这个格式添加更多网站 -->
-        
-        <!-- 网站1 -->
-        <div class="site">
-            <a href="https://portal.worldfirst.com.cn/" target="_blank">
-                <img src="images/worldfirst.png" alt="万里汇" onerror="this.src='images/default.png'">
-                <span>万里汇</span>
-            </a>
+    <!-- 右侧面板 -->
+    <div class="right-panel">
+        <!-- 输入区域 -->
+        <div class="input-area">
+            <textarea 
+                id="textInput" 
+                placeholder="请输入内容（最多10000字）..." 
+                maxlength="10000"
+            ></textarea>
+            <div class="button-area">
+                <button class="btn-clear" onclick="clearText()">清除</button>
+                <button class="btn-save" onclick="saveText()">保存</button>
+            </div>
         </div>
         
-        <!-- 网站1 -->
-        <div class="site">
-            <a href="https://www.5axxw.com/tools/web/web_run.html" target="_blank">
-                <img src="https://www.5axxw.com/tools/web/web_run.html" alt="网页在线制作" onerror="this.src='images/default.png'">
-                <span>网页在线制作</span>
-            </a>
+        <!-- 状态区域 -->
+        <div class="status-area">
+            <div class="status-text status-empty" id="statusText">等待操作...</div>
         </div>
-        
-        <!-- 网站2 -->
-        <div class="site">
-            <a href="https://link3.cc/dinguxiu" target="_blank">
-                <img src="https://link3.cc/dinguxiu/favicon.ico" alt="七七云享" onerror="this.src='default-icon.png'">
-                <span>七七云享</span>
-            </a>
-        </div>
-        
-        <!-- 网站3 -->
-        <div class="site">
-            <a href="https://docs.qq.com/sheet/DRVVxTHJ3RXJFVHVr?tab=BB08J2" target="_blank">
-                <img src="https://docs.qq.com/sheet/DRVVxTHJ3RXJFVHVr?tab=BB08J2/favicon.ico" alt="七七导航页" onerror="this.src='default-icon.png'">
-                <span>七七导航页</span>
-            </a>
-        </div>
-        
-        <!-- 网站4 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站5 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站6 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站7 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站8 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站9 -->
-        <div class="site">
-            <a href="cocfz.com" target="_blank">
-                <img src="cocfz.com/favicon.ico" alt="部落冲突辅助" onerror="this.src='default-icon.png'">
-                <span>部落冲突辅助</span>
-            </a>
-        </div>
-        
-        <!-- 网站10 -->
-        <div class="site">
-            <a href="https://chat.deepseek.com" target="_blank">
-                <img src="images/deepseek.png" alt="deepseek" onerror="this.src='images/default.png'">
-                <span>deepseek</span>
-            </a>
-        </div>
-        
-        <!-- 网站11 -->
-        <div class="site">
-            <a href="https://app.clipchamp.com" target="_blank">
-                <img src="https://app.clipchamp.com/favicon.ico" alt="Clipchamp视频剪辑" onerror="this.src='default-icon.png'">
-                <span>Clipchamp视频剪辑</span>
-            </a>
-        </div>
-        
-        <!-- 网站12 -->
-        <div class="site">
-            <a href="https://aic.oceanengine.com" target="_blank">
-                <img src="https://aic.oceanengine.com/favicon.ico" alt="即创" onerror="this.src='default-icon.png'">
-                <span>即创</span>
-            </a>
-        </div>
-        
-        <!-- 网站13 -->
-        <div class="site">
-            <a href="https://www.yunso.net" target="_blank">
-                <img src="https://www.yunso.net/favicon.ico" alt="小云网盘搜索
-" onerror="this.src='default-icon.png'">
-                <span>小云网盘搜索
-</span>
-            </a>
-        </div>
-        
-        <!-- 网站14 -->
-        <div class="site">
-            <a href="https://onlineweb.zhihuishu.com/onlinestuh5" target="_blank">
-                <img src="https://onlineweb.zhihuishu.com/onlinestuh5/favicon.ico" alt="知到" onerror="this.src='default-icon.png'">
-                <span>知到</span>
-            </a>
-        </div>
-        
-        <!-- 网站15 -->
-        <div class="site">
-            <a href="https://www.ketangpai.com/#/login" target="_blank">
-                <img src="https://www.ketangpai.com/#/login" alt="课堂派" onerror="this.src='default-icon.png'">
-                <span>课堂派</span>
-            </a>
-        </div>
-        
-        <!-- 网站16 -->
-        <div class="site">
-            <a href="https://www.zjooc.cn" target="_blank">
-                <img src="https://www.zjooc.cn/favicon.ico" alt="在浙学" onerror="this.src='default-icon.png'">
-                <span>在浙学</span>
-            </a>
-        </div>
-        
-        <!-- 网站17 -->
-        <div class="site">
-            <a href="https://www.yuketang.cn/web?next=/v2/web/index&type=3" target="_blank">
-                <img src="https://www.yuketang.cn/web?next=/v2/web/index&type=3" alt="雨课堂" onerror="this.src='default-icon.png'">
-                <span>雨课堂</span>
-            </a>
-        </div>
-        
-        <!-- 网站18 -->
-        <div class="site">
-            <a href="https://translatesubtitles.com" target="_blank">
-                <img src="https://translatesubtitles.com/favicon.ico" alt="字幕文件翻译（VPN）" onerror="this.src='default-icon.png'">
-                <span>字幕文件翻译（VPN）</span>
-            </a>
-        </div>
-        
-        <!-- 网站19 -->
-        <div class="site">
-            <a href="https://savesubs.com/zh" target="_blank">
-                <img src="https://savesubs.com/zh/favicon.ico" alt="字幕格式转换" onerror="this.src='default-icon.png'">
-                <span>字幕格式转换</span>
-            </a>
-        </div>
-        
-        <!-- 网站20 -->
-        <div class="site">
-            <a href="https://youtube.iiilab.com" target="_blank">
-                <img src="https://youtube.iiilab.com/favicon.ico" alt="YouTube视频解析" onerror="this.src='default-icon.png'">
-                <span>YouTube视频解析</span>
-            </a>
-        </div>
-        
-        <!-- 网站21 -->
-        <div class="site">
-            <a href="https://downsub.com/lang/zh" target="_blank">
-                <img src="https://downsub.com/lang/zh/favicon.ico" alt="YouTube字幕提取" onerror="this.src='default-icon.png'">
-                <span>YouTube字幕提取</span>
-            </a>
-        </div>
-        
-        <!-- 网站22 -->
-        <div class="site">
-            <a href="https://dy.kukutool.com/zh-Hans-SG" target="_blank">
-                <img src="https://dy.kukutool.com/zh-Hans-SG/favicon.ico" alt="抖音快手去水印" onerror="this.src='default-icon.png'">
-                <span>抖音快手去水印</span>
-            </a>
-        </div>
-        
-        <!-- 网站23 -->
-        <div class="site">
-            <a href="https://shiyrj.top" target="_blank">
-                <img src="https://shiyrj.top/favicon.ico" alt="电脑专业软件" onerror="this.src='default-icon.png'">
-                <span>电脑专业软件</span>
-            </a>
-        </div>
-        
-        <!-- 网站24 -->
-        <div class="site">
-            <a href="https://www.me887.com" target="_blank">
-                <img src="https://www.me887.com/favicon.ico" alt="专业软件网站" onerror="this.src='default-icon.png'">
-                <span>专业软件网站</span>
-            </a>
-        </div>
-        
-        <!-- 网站25 -->
-        <div class="site">
-            <a href="https://www.ruancang.net" target="_blank">
-                <img src="https://www.ruancang.net/favicon.ico" alt="软仓软件下载" onerror="this.src='default-icon.png'">
-                <span>软仓软件下载</span>
-            </a>
-        </div>
-        
-        <!-- 网站26 -->
-        <div class="site">
-            <a href="https://www.google.com/search?q=MOOC+APP+logo&hl=zh-CN&chips=q:mooc+app+logo,online_chips:%E4%B8%AD%E5%9B%BD%E5%A4%A7%E5%AD%A6:Y33PtNJuvY8%3D&sa=X&ved=2ahUKEwipztH79bODAxUdaPUHHV_PAqAQ4lYoBXoECAEQPg&biw=1519&bih=809&udm=2#imgrc=cm-jWGfNrSQa3M" target="_blank">
-                <img src="images/logo.png" onerror="this.src='images.default.png'">
-                <span>logo查找（VPN）</span>
-            </a>
-        </div>
-        
-        <!-- 网站27 -->
-        <div class="site">
-            <a href="https://www.1ppt.com" target="_blank">
-                <img src="https://www.1ppt.com/favicon.ico" alt="PPT素材下载" onerror="this.src='default-icon.png'">
-                <span>PPT素材下载</span>
-            </a>
-        </div>
-        
-        <!-- 网站28 -->
-        <div class="site">
-            <a href="http://www.romleyuan.com/rom/romlist?mid=49" target="_blank">
-                <img src="http://www.romleyuan.com/rom/romlist?mid=49/favicon.ico" alt="ROM乐园" onerror="this.src='default-icon.png'">
-                <span>ROM乐园</span>
-            </a>
-        </div>
-        
-        <!-- 网站29 -->
-        <div class="site">
-            <a href="https://www.freedidi.com" target="_blank">
-                <img src="https://www.freedidi.com/favicon.ico" alt="零度博客" onerror="this.src='default-icon.png'">
-                <span>零度博客</span>
-            </a>
-        </div>
-        
-        <!-- 网站30 -->
-        <div class="site">
-            <a href="https://tuostudy.upnb.top" target="_blank">
-                <img src="https://tuostudy.upnb.top/favicon.ico" alt="信息获取" onerror="this.src='default-icon.png'">
-                <span>信息获取</span>
-            </a>
-        </div>
-        
-        <!-- 网站31 -->
-        <div class="site">
-            <a href="https://www.12306.cn/index" target="_blank">
-                <img src="https://www.12306.cn/index/favicon.ico" alt="12306" onerror="this.src='default-icon.png'">
-                <span>12306</span>
-            </a>
-        </div>
-        
-        <!-- 网站32 -->
-        <div class="site">
-            <a href="https://www.youtube.com/watch?v=-knR4e467OI&t=329s" target="_blank">
-                <img src="https://www.youtube.com/watch?v=-knR4e467OI&t=329s/favicon.ico" alt="AI换脸教程" onerror="this.src='default-icon.png'">
-                <span>AI换脸教程</span>
-            </a>
-        </div>
-        
-        <!-- 网站33 -->
-        <div class="site">
-            <a href="https://soupian.pro" target="_blank">
-                <img src="https://soupian.pro/favicon.ico" alt="免费视频观看" onerror="this.src='default-icon.png'">
-                <span>免费视频观看</span>
-            </a>
-        </div>
-        
-        <!-- 网站34 -->
-        <div class="site">
-            <a href="https://www.ip38.com/" target="_blank">
-                <img src="https://www.ip38.com//favicon.ico" alt="IP查询" onerror="this.src='default-icon.png'">
-                <span>IP查询</span>
-            </a>
-        </div>
-        
-        <!-- 网站35 -->
-        <div class="site">
-            <a href="https://tool.ip38.com/" target="_blank">
-                <img src="https://tool.ip38.com//favicon.ico" alt="在线工具大全" onerror="this.src='default-icon.png'">
-                <span>在线工具大全</span>
-            </a>
-        </div>
-        
-        <!-- 网站36 -->
-        <div class="site">
-            <a href="https://www.lsapk.com/" target="_blank">
-                <img src="https://www.lsapk.com/favicon.ico" alt="破解软件下载网站" onerror="this.src='default-icon.png'">
-                <span>破解软件下载网站</span>
-            </a>
-        </div>
-        
-        <!-- 网站37 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站38 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站39 -->
-        <div class="site">
-            <a href="https://www.baidu.com" target="_blank">
-                <img src="https://www.baidu.com/favicon.ico" alt="百度" onerror="this.src='default-icon.png'">
-                <span>百度</span>
-            </a>
-        </div>
-        
-        <!-- 网站40 -->
-        <div class="site">
-            <a href="https://oopoo.top/" target="_blank">
-                <img src="images/mn.png" alt="自家网站" onerror="this.scr='images/default.png'">
-                <span>自家网站</span>
-            </a>
-        </div>
-        
+    </div>
 
     <script>
-        // 当图标加载失败时使用默认图标
-        document.querySelectorAll('img').forEach(img => {
-            img.addEventListener('error', function() {
-                this.src = 'images/default.png';
-            });
-        });
+        // 初始化数据
+        let items = [];
+        let selectedIndex = 0;
+        let maxItems = 0;
+
+        // 计算可以容纳的最大词条数量
+        function calculateMaxItems() {
+            const itemList = document.getElementById('itemList');
+            const listHeight = itemList.clientHeight;
+            const padding = 40; // 上下padding总和
+            const availableHeight = listHeight - padding;
+            
+            // 估算每个词条的高度（包括margin）
+            const itemHeight = 52; // padding(20) + border(4) + 内容高度(28)
+            const itemMargin = 8; // 词条之间的间距
+            
+            // 计算最多可以放多少个词条（不产生滚动条）
+            const count = Math.floor((availableHeight + itemMargin) / (itemHeight + itemMargin));
+            
+            return Math.max(1, count);
+        }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            // 计算最大词条数
+            maxItems = calculateMaxItems();
+            
+            // 从localStorage加载数据
+            const savedItems = localStorage.getItem('aiItems');
+            if (savedItems) {
+                const loadedItems = JSON.parse(savedItems);
+                // 如果保存的数据少于最大数量，补齐；如果多了，截取
+                items = loadedItems.slice(0, maxItems);
+                while (items.length < maxItems) {
+                    items.push('');
+                }
+            } else {
+                // 初始化空数组
+                items = Array(maxItems).fill('');
+            }
+            
+            console.log(`可容纳词条数量: ${maxItems}`);
+            
+            renderItems();
+            loadItemContent(0);
+        };
+
+        // 窗口大小改变时重新计算
+        window.onresize = function() {
+            const newMaxItems = calculateMaxItems();
+            if (newMaxItems !== maxItems) {
+                maxItems = newMaxItems;
+                
+                // 调整items数组大小
+                if (items.length < maxItems) {
+                    while (items.length < maxItems) {
+                        items.push('');
+                    }
+                } else if (items.length > maxItems) {
+                    items = items.slice(0, maxItems);
+                    if (selectedIndex >= maxItems) {
+                        selectedIndex = maxItems - 1;
+                    }
+                }
+                
+                renderItems();
+                loadItemContent(selectedIndex);
+                console.log(`调整后可容纳词条数量: ${maxItems}`);
+            }
+        };
+
+        // 渲染词条列表
+        function renderItems() {
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '';
+            
+            for (let i = 0; i < maxItems; i++) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item' + (i === selectedIndex ? ' selected' : '');
+                itemDiv.onclick = () => selectItem(i);
+                
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'item-number';
+                numberDiv.textContent = (i + 1);
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'item-content' + (items[i] ? '' : ' empty');
+                contentDiv.textContent = items[i] ? items[i].substring(0, 30) + (items[i].length > 30 ? '...' : '') : '空';
+                
+                itemDiv.appendChild(numberDiv);
+                itemDiv.appendChild(contentDiv);
+                itemList.appendChild(itemDiv);
+            }
+        }
+
+        // 选择词条
+        function selectItem(index) {
+            selectedIndex = index;
+            renderItems();
+            loadItemContent(index);
+        }
+
+        // 加载词条内容到输入框
+        function loadItemContent(index) {
+            document.getElementById('textInput').value = items[index] || '';
+        }
+
+        // 保存文本
+        function saveText() {
+            const text = document.getElementById('textInput').value.trim();
+            
+            if (text.length === 0) {
+                showStatus('请输入内容后再保存', 'info');
+                return;
+            }
+            
+            if (text.length > 10000) {
+                showStatus('内容超过10000字限制', 'info');
+                return;
+            }
+            
+            items[selectedIndex] = text;
+            localStorage.setItem('aiItems', JSON.stringify(items));
+            renderItems();
+            showStatus('保存成功！', 'success');
+        }
+
+        // 清除文本
+        function clearText() {
+            if (items[selectedIndex] === '') {
+                showStatus('当前词条已经是空的', 'info');
+                return;
+            }
+            
+            items[selectedIndex] = '';
+            document.getElementById('textInput').value = '';
+            localStorage.setItem('aiItems', JSON.stringify(items));
+            renderItems();
+            showStatus('清除成功！', 'success');
+        }
+
+        // 显示状态
+        function showStatus(message, type) {
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = message;
+            statusText.className = 'status-text status-' + type;
+            
+            // 3秒后恢复默认状态
+            setTimeout(() => {
+                statusText.textContent = '等待操作...';
+                statusText.className = 'status-text status-empty';
+            }, 3000);
+        }
     </script>
 </body>
 </html>
