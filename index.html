@@ -20,6 +20,7 @@
             overflow: hidden;
         }
         
+        /* 左侧区域 - 占1/3 */
         .left-panel {
             width: 33.33%;
             display: flex;
@@ -28,6 +29,7 @@
             height: 100%;
         }
         
+        /* 词条列表区域 - 占6/7 */
         .item-list {
             flex: 6;
             background-color: white;
@@ -90,10 +92,12 @@
             font-style: italic;
         }
         
+        /* 左侧空白区域 */
         .left-spacer {
             flex: 1;
         }
         
+        /* 右侧区域 - 占2/3 */
         .right-panel {
             width: 66.67%;
             display: flex;
@@ -102,6 +106,7 @@
             height: 100%;
         }
         
+        /* 输入区域 - 占3/4 */
         .input-area {
             flex: 3;
             display: flex;
@@ -130,6 +135,7 @@
             border-color: #1890ff;
         }
         
+        /* 按钮区域 */
         .button-area {
             margin-top: 15px;
             display: flex;
@@ -177,6 +183,7 @@
             transform: translateY(0);
         }
         
+        /* 状态区域 - 占1/4 */
         .status-area {
             flex: 1;
             background-color: white;
@@ -254,23 +261,18 @@
     </div>
 
     <script>
-        // ========== 配置区域 - 请修改这里 ==========
+        // ========== 配置区域 - 请修改token ==========
         const CONFIG = {
-            // 你的GitHub用户名
             owner: 'yxws1',
-            // 仓库名称
             repo: 'wangzhan',
-            // data.json文件的路径（如果在根目录就是 'data.json'）
             filePath: 'data.json',
-            // 你的GitHub Personal Access Token（需要有repo权限）
-            token: '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'
+            token: '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'  // ← 把这里改成你的token
         };
-        // ========================================
+        // ==========================================
 
         let items = [];
         let selectedIndex = 0;
-        let maxItems = 12; // 默认12个，后续可自动计算
-        let fileSha = ''; // 用于更新文件
+        let maxItems = 12;
 
         // 计算可以容纳的最大词条数量
         function calculateMaxItems() {
@@ -284,31 +286,24 @@
             return Math.max(1, count);
         }
 
-        // 从GitHub加载数据
+        // 从GitHub加载数据（使用raw链接）
         async function loadFromGitHub() {
             try {
                 showStatus('正在加载数据...', 'info');
                 setButtonsEnabled(false);
 
-                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.filePath}`;
+                const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/main/${CONFIG.filePath}`;
+                console.log('请求URL:', url);
+                
                 const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
+                    cache: 'no-cache'
                 });
 
                 if (!response.ok) {
                     throw new Error('无法加载数据文件');
                 }
 
-                const data = await response.json();
-                fileSha = data.sha; // 保存SHA用于后续更新
-
-                // 解码base64内容
-                const content = decodeURIComponent(escape(atob(data.content)));
-                const jsonData = JSON.parse(content);
-
+                const jsonData = await response.json();
                 items = jsonData.items || [];
                 
                 // 确保items数组长度符合maxItems
@@ -341,11 +336,31 @@
                 showStatus('正在保存到GitHub...', 'info');
                 setButtonsEnabled(false);
 
+                // 先获取当前文件的SHA
+                const getUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.filePath}`;
+                console.log('获取文件信息:', getUrl);
+                
+                const getResponse = await fetch(getUrl, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!getResponse.ok) {
+                    const errorData = await getResponse.json();
+                    throw new Error(errorData.message || '无法获取文件信息');
+                }
+
+                const fileData = await getResponse.json();
+                const sha = fileData.sha;
+
+                // 保存数据
                 const content = JSON.stringify({ items: items }, null, 2);
                 const encodedContent = btoa(unescape(encodeURIComponent(content)));
 
-                const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.filePath}`;
-                const response = await fetch(url, {
+                const putUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.filePath}`;
+                const response = await fetch(putUrl, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${CONFIG.token}`,
@@ -355,7 +370,7 @@
                     body: JSON.stringify({
                         message: `Update data - ${new Date().toLocaleString('zh-CN')}`,
                         content: encodedContent,
-                        sha: fileSha
+                        sha: sha
                     })
                 });
 
@@ -363,9 +378,6 @@
                     const errorData = await response.json();
                     throw new Error(errorData.message || '保存失败');
                 }
-
-                const data = await response.json();
-                fileSha = data.content.sha; // 更新SHA
 
                 showStatus('保存成功！', 'success');
                 setButtonsEnabled(true);
