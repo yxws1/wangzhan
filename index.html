@@ -545,6 +545,14 @@
             nav ul {
                 display: none;
             }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .contact-container {
+                padding: 30px;
+            }
         }
     </style>
 </head>
@@ -589,4 +597,271 @@
     <!-- 特性区 -->
     <section class="features fade-in" id="features">
         <h2 class="section-title">核心技术</h2>
-        <div class="feat
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-brain feature-icon"></i>
+                <h3>人工智能</h3>
+                <p>运用最先进的深度学习算法，打造智能化解决方案，让机器理解世界。</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-rocket feature-icon"></i>
+                <h3>极速性能</h3>
+                <p>采用边缘计算和优化算法，实现毫秒级响应，超越行业标准10倍。</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h3>安全防护</h3>
+                <p>军事级加密技术，多层次安全防护体系，保障数据绝对安全。</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-cube feature-icon"></i>
+                <h3>区块链技术</h3>
+                <p>去中心化架构，不可篡改的数据存储，构建可信数字世界。</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-cloud feature-icon"></i>
+                <h3>云端协作</h3>
+                <p>全球分布式云服务，随时随地访问，多人实时协作无障碍。</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt feature-icon"></i>
+                <h3>全平台支持</h3>
+                <p>一次开发，全平台部署，完美适配各种设备和操作系统。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3D项目展示 -->
+    <section class="projects fade-in" id="projects">
+        <h2 class="section-title">精选项目</h2>
+        <div class="projects-grid">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <i class="fas fa-robot" style="font-size: 64px; margin-bottom: 20px;"></i>
+                        <h3>智能助手</h3>
+                        <p>下一代AI对话系统</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <h4>功能亮点</h4>
+                        <ul>
+                            <li>自然语言理解</li>
+                            <li>多轮对话记忆</li>
+                            <li>情感分析</li>
+                            <li>个性化推荐</li>
+                        </ul>
+                        <a href="#" class="btn btn-outline">了解更多</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <i class="fas fa-chart-line" style="font-size: 64px; margin-bottom: 20px;"></i>
+                        <h3>数据分析平台</h3>
+                        <p>实时大数据处理引擎</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <h4>核心优势</h4>
+                        <ul>
+                            <li>PB级数据处理</li>
+                            <li>可视化仪表盘</li>
+                            <li>预测性分析</li>
+                            <li>自定义报表</li>
+                        </ul>
+                        <a href="#" class="btn btn-outline">了解更多</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <i class="fas fa-vr-cardboard" style="font-size: 64px; margin-bottom: 20px;"></i>
+                        <h3>VR元宇宙</h3>
+                        <p>沉浸式虚拟现实体验</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <h4>体验特色</h4>
+                        <ul>
+                            <li>真实物理引擎</li>
+                            <li>社交互动</li>
+                            <li>虚拟经济系统</li>
+                            <li>跨平台兼容</li>
+                        </ul>
+                        <a href="#" class="btn btn-outline">了解更多</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 统计数据 -->
+    <section class="stats fade-in" id="stats">
+        <h2 class="section-title">成就数据</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" data-target="1000">0</div>
+                <div class="stat-label">活跃用户（万）</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-target="500">0</div>
+                <div class="stat-label">成功项目</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-target="99">0</div>
+                <div class="stat-label">客户满意度（%）</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-target="24">0</div>
+                <div class="stat-label">7x24小时服务</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系表单 -->
+    <section class="contact fade-in" id="contact">
+        <h2 class="section-title">联系我们</h2>
+        <div class="contact-container">
+            <form>
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" placeholder="请输入您的姓名">
+                </div>
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="message">留言</label>
+                    <textarea id="message" placeholder="告诉我们您的需求..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">发送消息</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p>&copy; 2024 NeuroTech. All rights reserved. | 用 ❤️ 和 ☕ 制作</p>
+    </footer>
+
+    <script>
+        // ============ 粒子背景生成 ============
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 4 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // ============ 平滑滚动 ============
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // ============ 导航栏滚动效果 ============
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ============ 打字机效果 ============
+        const texts = [
+            '正在创造未来...',
+            '人工智能驱动创新...',
+            '重新定义可能性...',
+            '让科技更有温度...'
+        ];
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingElement = document.getElementById('typing');
+
+        function type() {
+            const currentText = texts[textIndex];
+            
+            if (isDeleting) {
+                typingElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typingElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? 50 : 100;
+
+            if (!isDeleting && charIndex === currentText.length) {
+                typeSpeed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % texts.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(type, typeSpeed);
+        }
+        type();
+
+        // ============ 鼠标跟随光标 ============
+        const cursorGlow = document.querySelector('.cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            cursorGlow.style.transform = `translate(${e.clientX - 150}px, ${e.clientY - 150}px)`;
+        });
+
+        // ============ 滚动显示动画 ============
+        const fadeElements = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        fadeElements.forEach(element => {
+            observer.observe(element);
+        });
+
+        // ============ 数字动画 ============
+        const statNumbers = document.querySelectorAll('.stat-number');
+        let animated = false;
+
+        const animateNumbers = () => {
+            if (animated) return;
+            
+            statNumbers.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'));
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                let current =
